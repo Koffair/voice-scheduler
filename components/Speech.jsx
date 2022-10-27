@@ -1,30 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import useSpeech from "../hooks/useSpeech";
 import styles from './styles.module.css';
 
 
 const Speech = () => {
-  const synth = useRef(null) 
   const [text, setText] = useState('')
   
-  useEffect(() => {
-    synth.current = window.speechSynthesis;
-  }, [])
-
-  const handleStart = () => {
-    const speakText = new SpeechSynthesisUtterance(text)
-    speakText.voice = synth.current.getVoices().find(({name}) => name === 'Mariska')
-    synth.current.speak(speakText)
-  }
-
-
-  const handleStop = () => {
-    synth.current.cancel();
-  }
+  const { startSpeaking, handleStop } = useSpeech()
 
   const handleInputChange = ({ target }) => {
     setText(target.value)
   }
-
 
   return (
     <div className="parent">
@@ -34,10 +20,10 @@ const Speech = () => {
         className={styles.textarea}
         placeholder="Írd ide a szöveget"
         onChange={handleInputChange}
-      ></textarea>
+      />
 
       <div className="btnparent">
-        <button className="btn" onClick={handleStart}>
+        <button className="btn" onClick={() => startSpeaking(text)}>
           Beszélj
         </button>
 

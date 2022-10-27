@@ -13,3 +13,11 @@ yarn dev
 References:
 How to build a voice to text app in React
 https://www.educative.io/answers/how-to-build-a-voice-to-text-app-in-react
+
+
+https://codesandbox.io/s/6s5ph
+
+
+
+
+

@@ -5,3 +5,8 @@
   padding: 10px;
   border-radius: 5px;
 }
+
+.textarea {
+  width: 100%;
+  min-height: 300px;
+}

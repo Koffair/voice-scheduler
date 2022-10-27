@@ -1,8 +1,14 @@
 import Dictaphone from "../components/Dictaphone";
+import Speech from "../components/Speech";
+import styles from '../styles/homepage.module.css'
 
 const App = () => {
   return (
-    <Dictaphone />
+    <div className={styles.wrap}>
+      <Dictaphone />
+      <hr />
+      <Speech />
+    </div>
   )
 }
 

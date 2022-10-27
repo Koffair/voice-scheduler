@@ -1,90 +1,52 @@
-import React, { Component } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from './styles.module.css';
 
-const synth = window.speechSynthesis;
 
-class App extends Component {
-  constructor(props) {
-    super(props);
+const Speech = () => {
+  const synth = useRef(null) 
+  const [text, setText] = useState('')
+  
+  useEffect(() => {
+    synth.current = window.speechSynthesis;
+  }, [])
 
-    this.state = {
-      voicelist: synth.getVoices(),
-      value: ""
-    };
-
-    //To get voices in beg. by manually firing event
-    synth.onvoiceschanged = () => {
-      const voices = synth.getVoices();
-      this.setState({ voicelist: voices });
-    };
-
-    this.speakfnc = this.speakfnc.bind(this);
-    this.textchange = this.textchange.bind(this);
-    this.langchng = this.langchng.bind(this);
+  const handleStart = () => {
+    const speakText = new SpeechSynthesisUtterance(text)
+    speakText.voice = synth.current.getVoices().find(({name}) => name === 'Mariska')
+    synth.current.speak(speakText)
   }
 
-  getVoices = () => {
-    this.setState({ voicelist: synth.getVoices() });
-  };
 
-  speakfnc() {
-    console.log("speakfnc called");
-    const speakText = new SpeechSynthesisUtterance(this.state.value);
-    speakText.voice = this.state.currLang;
-    synth.speak(speakText);
+  const handleStop = () => {
+    synth.current.cancel();
   }
 
-  speakfnckey = (event) => {
-    if (event.key === "Enter") {
-      const speakText = new SpeechSynthesisUtterance(this.state.value);
-      speakText.voice = this.state.currLang;
-      synth.speak(speakText);
-    }
-  };
-
-  stopfnc() {
-    console.log("stopfnc called");
-    synth.cancel();
+  const handleInputChange = ({ target }) => {
+    setText(target.value)
   }
 
-  textchange(event) {
-    this.setState({ value: event.target.value });
-  }
 
-  langchng(event) {
-    var langName = event.target.value;
-    // let currLang = find(this.state.voicelist, { name: langName });
+  return (
+    <div className="parent">
+      <h1 className="heading">Szövegből beszéd</h1>
 
-    // console.log(currLang);
+      <textarea
+        className={styles.textarea}
+        placeholder="Írd ide a szöveget"
+        onChange={handleInputChange}
+      ></textarea>
 
-    this.setState({ currLang: 'hu-HU' });
-  }
+      <div className="btnparent">
+        <button className="btn" onClick={handleStart}>
+          Beszélj
+        </button>
 
-  render() {
-    // console.log(this.state.voicelist);
-    return (
-      <div className="parent">
-        <h1 className="heading">Szövegből beszéd</h1>
-
-        <textarea
-          onKeyUp={this.speakfnckey}
-          className={styles.textarea}
-          placeholder="Írd ide a szöveget"
-          onChange={this.textchange}
-        ></textarea>
-
-        <div className="btnparent">
-          <button className="btn" onClick={this.speakfnc}>
-            Beszélj
-          </button>
-
-          <button className="btn" onClick={this.stopfnc}>
-            Állj
-          </button>
-        </div>
+        <button className="btn" onClick={handleStop}>
+          Állj
+        </button>
       </div>
-    );
-  }
+    </div>
+  )
 }
 
-export default App;
+export default Speech

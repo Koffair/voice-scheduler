@@ -25,7 +25,6 @@ const Dictaphone = () => {
     if (isRecording) {
       microphone.current.start()
       microphone.current.onend = () => {
-        console.log("continue..")
         microphone.current.start()
       }
     } else {
@@ -56,21 +55,23 @@ const Dictaphone = () => {
 
   return (
     <>
-      <h1>Record Voice Notes</h1>
+      <h1>Rögzíts hangjegyzetet</h1>
       <div>
         <div className={styles.noteContainer}>
-          <h2>Record Note Here</h2>
-          {isRecording ? <span>Recording... </span> : <span>Stopped </span>}
-          <button className="button" onClick={storeNote} disabled={!note}>
-            Save
+          <h2>Hangjegyzet</h2>
+          <button className="button" onClick={storeNote} disabled={!note || isRecording}>
+            Mentés
           </button>
           <button onClick={() => setisRecording((prevState) => !prevState)}>
-            Start/Stop
+            {isRecording ? "Állj" : "Rögzítés"}
           </button>
+          {" "}
+          {isRecording ? <span>Felvétel folyamatban... </span> : <span>Megállítva </span>}
           <p>{note}</p>
         </div>
         <div className={styles.noteContainer}>
-          <h2>Notes Store</h2>
+          <h2>Elmentett jegyzetek</h2>
+          <p>{notesStore}</p>
         </div>
       </div>
     </>

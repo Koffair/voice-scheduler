@@ -1,11 +1,11 @@
 import Dictaphone from "../components/Dictaphone";
-import styles from '../styles/homepage.module.css'
+import Layout from "../components/Layout";
 
 const App = () => {
   return (
-    <div className={styles.wrap}>
+    <Layout>
       <Dictaphone />
-    </div>
+    </Layout>
   )
 }
 

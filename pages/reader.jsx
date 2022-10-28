@@ -1,11 +1,11 @@
+import Layout from "../components/Layout";
 import Speech from "../components/Speech";
-import styles from '../styles/homepage.module.css'
 
 const ReaderPage = () => {
   return (
-    <div className={styles.wrap}>
+    <Layout>
       <Speech />
-    </div>
+    </Layout>
   )
 }
 

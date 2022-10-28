@@ -1,3 +1,4 @@
+import Layout from "../components/Layout"
 import useSpeech from "../hooks/useSpeech"
 
 
@@ -9,14 +10,16 @@ const SchedulePage = () => {
   }
 
   return (
-    <section>
-      <p>Foglaljon időpontot virtuális asszisztensünknél</p>
-      <button
-        onClick={hancdleStartClick}
-        >
-        Mehet
-      </button>
-    </section>
+    <Layout>
+      <section>
+        <p>Foglaljon időpontot virtuális asszisztensünknél</p>
+        <button
+          onClick={hancdleStartClick}
+          >
+          Mehet
+        </button>
+      </section>
+    </Layout>
   )
 }
 

@@ -1,53 +1,18 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState } from "react"
+import useSpeechRecognition from "../hooks/useSpeechRecognition"
 import styles from "./styles.module.css"
 
 const Dictaphone = () => {
-  const [isRecording, setisRecording] = useState(false)
   const [note, setNote] = useState(null)
   const [notesStore, setnotesStore] = useState([])
 
-  const microphone = useRef(null)
+  const {
+    startStopRecording,
+    isRecording
+  } = useSpeechRecognition({
+    onResult: setNote
+  })
 
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    microphone.current = new SpeechRecognition()
-  
-    microphone.current.continuous = true
-    microphone.current.interimResults = true
-    microphone.current.lang = "hu-HU"
-  }, [])
-
-  useEffect(() => {
-    startRecordController()
-  }, [isRecording])
-
-  const startRecordController = () => {
-    if (isRecording) {
-      microphone.current.start()
-      microphone.current.onend = () => {
-        microphone.current.start()
-      }
-    } else {
-      microphone.current.stop()
-      microphone.current.onend = () => {
-        console.log("Stopped microphone on Click")
-      }
-    }
-    microphone.current.onstart = () => {
-      console.log("microphones on")
-    }
-  
-    microphone.current.onresult = (event) => {
-      const recordingResult = Array.from(event.results)
-        .map((result) => result[0])
-        .map((result) => result.transcript)
-        .join("")
-      setNote(recordingResult)
-      microphone.current.onerror = (event) => {
-        console.log(event.error)
-      }
-    }
-  }
   const storeNote = () => {
     setnotesStore([...notesStore, note])
     setNote("")
@@ -62,7 +27,7 @@ const Dictaphone = () => {
           <button className="button" onClick={storeNote} disabled={!note || isRecording}>
             Mentés
           </button>
-          <button onClick={() => setisRecording((prevState) => !prevState)}>
+          <button onClick={startStopRecording}>
             {isRecording ? "Állj" : "Rögzítés"}
           </button>
           {" "}

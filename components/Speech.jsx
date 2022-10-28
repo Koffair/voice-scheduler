@@ -6,7 +6,7 @@ import styles from './styles.module.css';
 const Speech = () => {
   const [text, setText] = useState('')
   
-  const { startSpeaking, handleStop } = useSpeech()
+  const { startSpeaking, stopSpeaking } = useSpeech()
 
   const handleInputChange = ({ target }) => {
     setText(target.value)
@@ -27,7 +27,7 @@ const Speech = () => {
           Beszélj
         </button>
 
-        <button className="btn" onClick={handleStop}>
+        <button className="btn" onClick={stopSpeaking}>
           Állj
         </button>
       </div>

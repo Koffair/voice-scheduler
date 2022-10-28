@@ -13,13 +13,13 @@ const useSpeech = () => {
     synth.current.speak(speakText)
   }
 
-  const handleStop = () => {
+  const stopSpeaking = () => {
     synth.current.cancel()
   }
 
   return {
     startSpeaking,
-    handleStop,
+    stopSpeaking,
   }
 }
 

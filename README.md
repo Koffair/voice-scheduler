@@ -1,21 +1,25 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+
+![](public/koffair-logo.png)
+
+# Voice Scheduler
+
+Voice-recognition-based virtual assistant to schedule appointments with no human interaction. It is 100% client-side JS with zero cloud infrastucture.
+
 ## Getting Started
 
-First, run the development server:
+For local development, install and run the development server:
 
 ```bash
-npm run dev
+npm i && npm run dev
 # or
-yarn dev
+yarn && yarn dev
 ```
 
-References:
-How to build a voice to text app in React
-https://www.educative.io/answers/how-to-build-a-voice-to-text-app-in-react
+Than visit http://localhost:3000/schedule to make an appointment.
 
 
-https://codesandbox.io/s/6s5ph
 
 
 

@@ -25,6 +25,7 @@ const Schedule = () => {
     setisRecording(false)
     const answer = userAnswer.current
     userAnswer.current = ''
+    console.log(answer)
     return answer
   }
 

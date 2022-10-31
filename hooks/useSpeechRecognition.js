@@ -1,25 +1,31 @@
 import { useState, useEffect, useRef } from "react"
 
+const defaultOptions = {
+  continuous: true,
+  interimResults: true,
+  lang: "hu-HU"
+}
+
 const useSpeechRecognition = ({
   onStopped = () => {},
   onStarted = () => {},
   onResult = () => {},
-  onError = (errorEvent) => {}
+  onError = (errorEvent) => {},
+  options = {}
 }) => {
-  const microphone = useRef(null)
+  const recognition = useRef(null)
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    microphone.current = new SpeechRecognition()
-  
-    microphone.current.continuous = true
-    microphone.current.interimResults = true
-    microphone.current.lang = "hu-HU"
+    recognition.current = new SpeechRecognition()
+    Object.entries({ ...defaultOptions, ...options }).forEach(([key, value]) => {
+      recognition.current[key] = value
+    })
   }, [])
 
   const [isRecording, setisRecording] = useState(false)
 
-  const startStopRecording = () => {
+  const toggleRecording = () => {
     setisRecording((prevState) => !prevState)
   }
 
@@ -29,28 +35,29 @@ const useSpeechRecognition = ({
 
   const startRecordController = () => {
     if (isRecording) {
-      microphone.current.start()
-      microphone.current.onend = () => {
-        microphone.current.start()
-      }
+      recognition.current.start()
+      // recognition.current.onend = () => {
+      //   console.log('talk ended by silence')
+      //   recognition.current.start()
+      // }
     } else {
-      microphone.current.stop()
-      microphone.current.onend = () => {
+      recognition.current.stop()
+      recognition.current.onend = () => {
         onStopped()
       }
     }
-    microphone.current.onstart = () => {
+    recognition.current.onstart = () => {
       onStarted()
     }
   
-    microphone.current.onresult = (event) => {
+    recognition.current.onresult = (event) => {
       const recordingResult = Array.from(event.results)
         .map((result) => result[0])
         .map((result) => result.transcript)
         .join("")
         onResult(recordingResult)
 
-      microphone.current.onerror = (event) => {
+      recognition.current.onerror = (event) => {
         onError(event.error)
       }
     }
@@ -58,7 +65,8 @@ const useSpeechRecognition = ({
 
   return {
     isRecording,
-    startStopRecording,
+    toggleRecording,
+    setisRecording
   }
 }
 

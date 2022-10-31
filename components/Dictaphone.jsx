@@ -7,7 +7,7 @@ const Dictaphone = () => {
   const [notesStore, setnotesStore] = useState([])
 
   const {
-    startStopRecording,
+    toggleRecording,
     isRecording
   } = useSpeechRecognition({
     onResult: setNote
@@ -27,7 +27,7 @@ const Dictaphone = () => {
           <button className="button" onClick={storeNote} disabled={!note || isRecording}>
             Mentés
           </button>
-          <button onClick={startStopRecording}>
+          <button onClick={toggleRecording}>
             {isRecording ? "Állj" : "Rögzítés"}
           </button>
           {" "}

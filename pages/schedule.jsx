@@ -1,11 +1,14 @@
-import Layout from "../components/Layout"
+import AppLayout from "../components/AppLayout"
 import Schedule from "../components/Schedule"
+import SubPageLayout from "../components/SubPageLayout"
 
 const SchedulePage = () => {
   return (
-    <Layout>
-      <Schedule />
-    </Layout>
+    <AppLayout>
+      <SubPageLayout>
+        <Schedule />
+      </SubPageLayout>
+    </AppLayout>
   )
 }
 

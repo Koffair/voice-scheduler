@@ -1,11 +1,14 @@
 import Dictaphone from "../components/Dictaphone";
-import Layout from "../components/Layout";
+import AppLayout from "../components/AppLayout";
+import SubPageLayout from "../components/SubPageLayout";
 
 const App = () => {
   return (
-    <Layout>
-      <Dictaphone />
-    </Layout>
+    <AppLayout>
+      <SubPageLayout>
+        <Dictaphone />
+      </SubPageLayout>
+    </AppLayout>
   )
 }
 

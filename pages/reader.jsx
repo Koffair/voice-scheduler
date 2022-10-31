@@ -1,11 +1,14 @@
-import Layout from "../components/Layout";
+import AppLayout from "../components/AppLayout";
 import Speech from "../components/Speech";
+import SubPageLayout from "../components/SubPageLayout";
 
 const ReaderPage = () => {
   return (
-    <Layout>
-      <Speech />
-    </Layout>
+    <AppLayout>
+      <SubPageLayout>
+        <Speech />
+      </SubPageLayout>
+    </AppLayout>
   )
 }
 

@@ -54,7 +54,7 @@ const Schedule = () => {
     let offerAccepted
     for (const slot of slots) {
       await say(slot.title)
-      if (await waitForAnswer() === 'igen') {
+      if ((await waitForAnswer()).toLowerCase() === 'igen') {
         offerAccepted = true
         setselectedSlot(slot)
         break
@@ -70,7 +70,7 @@ const Schedule = () => {
   const confirmSelectedSlot = async () => {
     await say(`Köszönöm. Ön a következő időpontot választotta: ${selectedSlot?.title}`)
     await say('A megerősítéshez mondjon igent')
-    if (await waitForAnswer() === 'igen') {
+    if ((await waitForAnswer()).toLowerCase() === 'igen') {
       setConfirmed(true)
       await say(`
         Köszönöm.

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import ICalendarLink from "react-icalendar-link";
 import useFlow from '../../hooks/useFlow'
 import useSpeech from "../../hooks/useSpeech"
@@ -26,16 +26,6 @@ const Schedule = () => {
     userAnswer.current = answer
   }
 
-  const waitForAnswer = async (time = 3) => {
-    setisRecording(true)
-    await wait(time)
-    setisRecording(false)
-    const answer = userAnswer.current
-    userAnswer.current = ''
-    console.log(answer)
-    return answer
-  }
-
   const {
     setisRecording
   } = useSpeechRecognition({
@@ -50,12 +40,38 @@ const Schedule = () => {
   const [selectedSlot, setselectedSlot] = useState(null)
   const [confirmed, setConfirmed] = useState(false)
 
+  const waitForAnswer = useCallback(async (time = 3) => {
+    setisRecording(true)
+    await wait(time)
+    setisRecording(false)
+    const answer = userAnswer.current
+    userAnswer.current = ''
+    return answer
+  }, [setisRecording, wait])  
+
+  const confirmSelectedSlot = useCallback(async () => {
+    await say(`Thank you. You have choosen the: ${selectedSlot?.title}`)
+    await say('To confirm, please, say yes')
+    if ((await waitForAnswer()).toLowerCase() === 'yes') {
+      setConfirmed(true)
+      await say(`
+        Thank you.
+        Your appointment has been confirmed.
+        See you on: ${selectedSlot?.title}.
+        Good bye.
+      `)
+      setIsCalling(false)
+    } else {
+      await say('Ön nem erősítette meg a foglalást. A foglalás sikertelen. Viszontlátásra.')
+      setIsCalling(false)
+    }
+  }, [say, waitForAnswer, setConfirmed, setIsCalling, selectedSlot])
 
   useEffect(() => {
     if (selectedSlot){
       confirmSelectedSlot()
     }
-  }, [selectedSlot])
+  }, [selectedSlot, confirmSelectedSlot])
 
 
   const sayOffers = async () => {
@@ -73,24 +89,6 @@ const Schedule = () => {
     await say('You have not choosen any slot. Good bye.')
     setIsCalling(false)
    }
-  }
-
-  const confirmSelectedSlot = async () => {
-    await say(`Thank you. You have choosen the: ${selectedSlot?.title}`)
-    await say('To confirm, please, say yes')
-    if ((await waitForAnswer()).toLowerCase() === 'yes') {
-      setConfirmed(true)
-      await say(`
-        Thank you.
-        Your appointment has been confirmed.
-        See you on: ${selectedSlot?.title}.
-        Good bye.
-      `)
-      setIsCalling(false)
-    } else {
-      await say('Ön nem erősítette meg a foglalást. A foglalás sikertelen. Viszontlátásra.')
-      setIsCalling(false)
-    }
   }
 
 

@@ -139,7 +139,7 @@ const Schedule = () => {
         onClick={() => setStep('WELCOME')}
         disabled={isCalling}
         >
-        Let's get started
+        Start
       </button>
       {userAnswer}
       <p style={{ color: 'gray' }}>Status: {steps[step]}</p>

@@ -22,7 +22,7 @@ const Schedule = () => {
   const { wait } = useFlow()
 
   const [isCalling, setIsCalling] = useState(false)
-  const [userAnswer, setUserAsnwer] = useState('')
+  const [userAnswer, setUserAsnwer] = useState(null)
   const [offeredSlotIndex, setOfferedSlotIndex] = useState(null)
   const [selectedSlot, setselectedSlot] = useState(null)
   const [confirmed, setConfirmed] = useState(false)
@@ -73,12 +73,11 @@ const Schedule = () => {
 
 
   useEffect(() => {
-    if (['yes', 'yeah'].includes(userAnswer?.toLowerCase())) {
+    if (userAnswer === 'yes'){
       stopListening()
       if (selectedSlot) {
         setConfirmed(true)
-        say(`Your appointment has been confirmed. See you on ${getReadableDateTime(selectedSlot?.start)}. Good bye.`)
-        .then(setIsCalling(false))
+        say(`Your appointment has been confirmed. See you on ${getReadableDateTime(selectedSlot?.start)}. Good bye.`).then(stopListening)
       } else {
         setselectedSlot(slots[offeredSlotIndex])
       }
@@ -89,15 +88,12 @@ const Schedule = () => {
     await say(`Thank you. You have choosen the: ${getReadableDateTime(selectedSlot?.start)}`)
     await say('To confirm, please, say yes')
     startListening()
-    await wait(8)
-    stopListening()
-
-    // if (!confirmed) {
-    //   say('You have not confirmed your appointment. The booking has been failed. Good bye.')
-    //   .then(() => {
-    //     setIsCalling(false)
-    //   })
-    // }
+    wait(8).then(() => {
+      stopListening()
+      return say('You have not confirmed your appointment. The booking has been failed. Good bye.')
+    }).then(() => {
+      setIsCalling(false)
+    })
   }
 
   useEffect(() => {
@@ -128,10 +124,10 @@ const Schedule = () => {
         >
         Let's get started
       </button>
-      {!selectedSlot && offeredSlotIndex !== null && <p>Offering: {getReadableDateTime(slots[offeredSlotIndex]?.start)}</p>}
-      {selectedSlot && <p>Selected: {selectedSlot?.start}</p>}
+      {offeredSlotIndex !== null && <p>Offering: {getReadableDateTime(slots[offeredSlotIndex]?.start)}</p>}
       {isRecording && <p>Listening...</p>}
       <p>{userAnswer}</p>
+      {selectedSlot && <p>Selected: {selectedSlot?.start}</p>}
       <br /><br />
       {confirmed && (
         <ICalendarLink event={{

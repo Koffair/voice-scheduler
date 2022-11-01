@@ -40,10 +40,10 @@ const Schedule = () => {
     setisRecording,
     isRecording
   } = useSpeechRecognition({
-    onResult: setUserAsnwer,
+    onResult: setUserAsnwer, // TODO: have to throttle this as multipl
     options: {
-      continuous: true,
-      interimResults: true,
+      continuous: false,
+      interimResults: false,
     }
   })
 
@@ -101,7 +101,7 @@ const Schedule = () => {
       setselectedSlot(slots[offeredSlotIndex])
       setStep('SLOT_SELECTED')
     }
-  }, [step])
+  }, [step, userAnswer])
 
   const confirmSelectedSlot = async () => {
     await say(`Thank you. You have choosen the: ${getReadableDateTime(selectedSlot?.start)}`)
@@ -141,7 +141,6 @@ const Schedule = () => {
         >
         Start
       </button>
-      {userAnswer}
       <p style={{ color: 'gray' }}>Status: {steps[step]}</p>
       {!selectedSlot && offeredSlotIndex !== null && slots[offeredSlotIndex] && <p>{getReadableDateTime(slots[offeredSlotIndex]?.start)}</p>}
       {selectedSlot && <p>{getReadableDateTime(selectedSlot?.start)}</p>}

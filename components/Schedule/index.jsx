@@ -62,7 +62,7 @@ const Schedule = () => {
       `)
       setIsCalling(false)
     } else {
-      await say('Ön nem erősítette meg a foglalást. A foglalás sikertelen. Viszontlátásra.')
+      await say('You did not confirm.')
       setIsCalling(false)
     }
   }, [say, waitForAnswer, setConfirmed, setIsCalling, selectedSlot])

@@ -110,7 +110,7 @@ const Schedule = () => {
         onClick={hancdleStartClick}
         disabled={isCalling}
         >
-        Let's get started
+        Start
       </button>
       <br /><br />
       {confirmed && (

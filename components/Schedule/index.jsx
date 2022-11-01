@@ -4,10 +4,17 @@ import useFlow from '../../hooks/useFlow'
 import useSpeech from "../../hooks/useSpeech"
 import useSpeechRecognition from '../../hooks/useSpeechRecognition'
 
+const getReadableDateTime = (timeString, locale = 'en-US') => {
+  const date = new Date(timeString)
+  const day = date.toGMTString().split(' ').slice(0, 3).join(' ') // TODO: GTM only works in en-US. Need further enhancement with localetimestrind
+  const time = date.toLocaleTimeString(locale, { hour: 'numeric', minute: 'numeric' })
+  return `${day}, ${time}`
+}
+
 const slots = [
-  { timeString: "2022-11-02T09:00:00+01:00", title: "E hét szerda 9 óra" },
-  { timeString: "2022-11-04T15:00:00+01:00", title: "E hét péntek 3 óra" },
-  { timeString: "2022-11-08T12:00:00+01:00", title: "Jövő kedd 12 óra" },
+  { timeString: "2022-11-09T09:00:00+01:00", title: getReadableDateTime("2022-11-09T09:00:00+01:00") },
+  { timeString: "2022-11-11T15:00:00+01:00", title: getReadableDateTime("2022-11-11T15:00:00+01:00") },
+  { timeString: "2022-11-12T12:00:00+01:00", title: getReadableDateTime("2022-11-12T12:00:00+01:00") },
 ]
 
 const Schedule = () => {
@@ -55,7 +62,7 @@ const Schedule = () => {
     let offerAccepted
     for (const slot of slots) {
       await say(slot.title)
-      if ((await waitForAnswer()).toLowerCase() === 'igen') {
+      if ((await waitForAnswer()).toLowerCase() === 'yes') {
         offerAccepted = true
         setselectedSlot(slot)
         break
@@ -63,21 +70,21 @@ const Schedule = () => {
 
     }
    if (!offerAccepted) {
-    await say('Ön nem választott időpontot. Viszontlátásra.')
+    await say('You have not choosen any slot. Good bye.')
     setIsCalling(false)
    }
   }
 
   const confirmSelectedSlot = async () => {
-    await say(`Köszönöm. Ön a következő időpontot választotta: ${selectedSlot?.title}`)
-    await say('A megerősítéshez mondjon igent')
-    if ((await waitForAnswer()).toLowerCase() === 'igen') {
+    await say(`Thank you. You have choosen the: ${selectedSlot?.title}`)
+    await say('To confirm, please, say yes')
+    if ((await waitForAnswer()).toLowerCase() === 'yes') {
       setConfirmed(true)
       await say(`
-        Köszönöm.
-        A foglalás megerősítve.
-        Várjuk Önt a következő időpontban: ${selectedSlot?.title}.
-        A viszontlátásra.
+        Thank you.
+        Your appointment has been confirmed.
+        See you on: ${selectedSlot?.title}.
+        Good bye.
       `)
       setIsCalling(false)
     } else {
@@ -90,32 +97,32 @@ const Schedule = () => {
   const hancdleStartClick = async () => {
     setIsCalling(true)
     await say(`
-      Üdvözlöm, Gedeon bácsi fodrászüzletét hívta.
-      Én egy virtuális asszisztens vagyok, nálam tud időpontot foglalni, hogy ne zavarjuk a mestert munka közben.
-      Felsorolom önnek a szabad időpontokat, amelyekből választhat.
-      Amennyiben megfelel az időpont, mondja azt, hogy igen.
+      Hello. You are calling the hair dresser shop of Gideon.
+      I am a virtual assistant and I will help you to book a slot for you.
+      I will offer you the available slots.
+      To choose one, please, say yes.
     `)
     await sayOffers()
   }
 
   return (
     <section>
-      <p>Foglaljon időpontot virtuális asszisztensünknél</p>
+      <p>Book a slot with the help of our virtual assistant</p>
       <button
         onClick={hancdleStartClick}
         disabled={isCalling}
         >
-        Mehet
+        Let's get started
       </button>
       <br /><br />
       {confirmed && (
         <ICalendarLink event={{
-          title: "Fodrász",
+          title: "Hair dresser",
           startTime: selectedSlot.timeString,
-          location: "Lövőház utca 2-6, Budapest",
+          location: "Budapest, Kis Rókus u. 16-20, 1024",
         }}>
           <button>
-            Hozzáadás a naptáramhoz
+            Add to my calendar
           </button>
         </ICalendarLink>
       )}

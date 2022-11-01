@@ -10,6 +10,14 @@ const slots = [
   { start: "2022-11-12T12:00:00+01:00" },
 ]
 
+const steps = {
+  IDLE: 'Idle',
+  WELCOME: 'Welcome text',
+  OFFERING: 'Offering slots',
+  SLOT_SELECTED: 'Asking for confirmation',
+  NOT_CHOOSEN: 'No slots left and no slots has been choosen',
+}
+
 const getReadableDateTime = (timeString, locale = 'en-US') => {
   const date = new Date(timeString)
   const day = date.toGMTString().split(' ').slice(0, 3).join(' ') // TODO: GTM only works in en-US. Need further enhancement with localetimestrind
@@ -21,8 +29,9 @@ const Schedule = () => {
   const { say, stopSpeaking } = useSpeech()
   const { wait } = useFlow()
 
+  const [step, setStep] = useState('IDLE')
   const [isCalling, setIsCalling] = useState(false)
-  const [userAnswer, setUserAsnwer] = useState(null)
+  const [userAnswer, setUserAsnwer] = useState('')
   const [offeredSlotIndex, setOfferedSlotIndex] = useState(null)
   const [selectedSlot, setselectedSlot] = useState(null)
   const [confirmed, setConfirmed] = useState(false)
@@ -39,20 +48,23 @@ const Schedule = () => {
   })
 
   const startListening = () => {
-    setUserAsnwer(null)
+    setUserAsnwer(() => '')
     setisRecording(true)
   }
 
   const stopListening = () => {
+    setUserAsnwer(() => '')
     setisRecording(false)
   }
 
   useEffect(() => {
     if (offeredSlotIndex !== null && !selectedSlot) {
       if (!slots[offeredSlotIndex]) {
+        setStep('NOT_CHOOSEN')
         say('You have not choosen any slot. Good bye.').then(() => {
           stopListening()
           setIsCalling(false)
+          setStep('IDLE')
         })
         return
       }
@@ -70,64 +82,69 @@ const Schedule = () => {
     }
   }, [offeredSlotIndex])
 
-
+  const saidYes = () => {
+    return ['yes', 'yeah'].includes(userAnswer.toLowerCase())
+  }
 
   useEffect(() => {
-    if (userAnswer === 'yes'){
+    if (step === 'SLOT_SELECTED' && saidYes()) {
       stopListening()
-      if (selectedSlot) {
-        setConfirmed(true)
-        say(`Your appointment has been confirmed. See you on ${getReadableDateTime(selectedSlot?.start)}. Good bye.`).then(stopListening)
-      } else {
-        setselectedSlot(slots[offeredSlotIndex])
-      }
+      setConfirmed(true)
+      setStep('IDLE')
+      say(`Your appointment has been confirmed. See you on ${getReadableDateTime(selectedSlot?.start)}. Good bye.`).then(() => {
+        setIsCalling(false)
+      })
     }
-  }, [userAnswer])
+
+    if (step === 'OFFERING' && saidYes()) {
+      stopListening()
+      setselectedSlot(slots[offeredSlotIndex])
+      setStep('SLOT_SELECTED')
+    }
+  }, [step])
 
   const confirmSelectedSlot = async () => {
     await say(`Thank you. You have choosen the: ${getReadableDateTime(selectedSlot?.start)}`)
     await say('To confirm, please, say yes')
     startListening()
-    wait(8).then(() => {
-      stopListening()
-      return say('You have not confirmed your appointment. The booking has been failed. Good bye.')
-    }).then(() => {
-      setIsCalling(false)
-    })
   }
 
   useEffect(() => {
-    if (selectedSlot){
+    if (selectedSlot && !confirmed) {
       confirmSelectedSlot()
     }
   }, [selectedSlot])
 
 
 
-  const hancdleStartClick = async () => {
-    setIsCalling(true)
-    await say(`
-      Hello. You are calling the hair dresser shop of Gideon.
-      I am a virtual assistant and I will help you to book a slot for you.
-      I will offer you the available slots.
-      To choose one, please, say yes.
-    `)
-    setOfferedSlotIndex(0)
-  }
+  useEffect(() => {
+    if (step === 'WELCOME') {
+      setIsCalling(true)
+      say(`
+        Hello. You are calling the hair dresser shop of Gideon.
+        I am a virtual assistant and I will help you to book a slot for you.
+        I will offer you the available slots.
+        To choose one, please, say yes.
+      `).then(() => setStep('OFFERING'))
+    }
+    if (step === 'OFFERING') {
+      setOfferedSlotIndex(0)
+    }
+  }, [step])
 
   return (
     <section>
       <p>Book a slot with the help of our virtual assistant</p>
       <button
-        onClick={hancdleStartClick}
+        onClick={() => setStep('WELCOME')}
         disabled={isCalling}
         >
         Let's get started
       </button>
-      {offeredSlotIndex !== null && <p>Offering: {getReadableDateTime(slots[offeredSlotIndex]?.start)}</p>}
-      {isRecording && <p>Listening...</p>}
-      <p>{userAnswer}</p>
-      {selectedSlot && <p>Selected: {selectedSlot?.start}</p>}
+      <p style={{ color: 'gray' }}>Status: {steps[step]}</p>
+      {!selectedSlot && offeredSlotIndex !== null && slots[offeredSlotIndex] && <p>{getReadableDateTime(slots[offeredSlotIndex]?.start)}</p>}
+      {selectedSlot && <p>{getReadableDateTime(selectedSlot?.start)}</p>}
+      {isRecording && <p>Listening your answer...</p>}
       <br /><br />
       {confirmed && (
         <ICalendarLink event={{

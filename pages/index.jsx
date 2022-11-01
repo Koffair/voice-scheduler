@@ -1,26 +1,10 @@
-import Link from "next/link";
 import AppLayout from "../components/AppLayout";
-import styles from '../styles/homepage.module.css'
+import Schedule from "../components/Schedule"
 
 const App = () => {
   return (
     <AppLayout>
-      <section>
-        <nav className={styles.wrap}>
-          <h3>Menü</h3>
-          <ul>
-            <li>
-              <Link href="/voice-note">Hangjegyzet</Link>
-            </li>
-            <li>
-              <Link href="/reader">Felolvasó</Link>
-            </li>
-            <li>
-              <Link href="/schedule">Időpont foglaló</Link>
-            </li>          
-          </ul>
-        </nav>
-      </section>
+      <Schedule />
     </AppLayout>
   )
 }

@@ -141,6 +141,7 @@ const Schedule = () => {
         >
         Let's get started
       </button>
+      {userAnswer}
       <p style={{ color: 'gray' }}>Status: {steps[step]}</p>
       {!selectedSlot && offeredSlotIndex !== null && slots[offeredSlotIndex] && <p>{getReadableDateTime(slots[offeredSlotIndex]?.start)}</p>}
       {selectedSlot && <p>{getReadableDateTime(selectedSlot?.start)}</p>}

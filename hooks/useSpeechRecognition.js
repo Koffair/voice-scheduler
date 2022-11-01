@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react"
 const defaultOptions = {
   continuous: true,
   interimResults: true,
-  lang: "hu-HU"
+  lang: "en-US"
 }
 
 const useSpeechRecognition = ({

@@ -5,44 +5,96 @@ import useSpeech from "../../hooks/useSpeech"
 import useSpeechRecognition from '../../hooks/useSpeechRecognition'
 
 const slots = [
-  { timeString: "2022-11-02T09:00:00+01:00", title: "E hét szerda 9 óra" },
-  { timeString: "2022-11-04T15:00:00+01:00", title: "E hét péntek 3 óra" },
-  { timeString: "2022-11-08T12:00:00+01:00", title: "Jövő kedd 12 óra" },
+  { start: "2022-11-09T09:00:00+01:00" },
+  { start: "2022-11-11T15:00:00+01:00" },
+  { start: "2022-11-12T12:00:00+01:00" },
 ]
+
+const getReadableDateTime = (timeString, locale = 'en-US') => {
+  const date = new Date(timeString)
+  const day = date.toGMTString().split(' ').slice(0, 3).join(' ') // TODO: GTM only works in en-US. Need further enhancement with localetimestrind
+  const time = date.toLocaleTimeString(locale, { hour: 'numeric', minute: 'numeric' })
+  return `${day}, ${time}`
+}
 
 const Schedule = () => {
   const { say, stopSpeaking } = useSpeech()
   const { wait } = useFlow()
-  const userAnswer = useRef('')
-
-  const handleGotAnswer = (answer) => {
-    userAnswer.current = answer
-  }
-
-  const waitForAnswer = async (time = 3) => {
-    setisRecording(true)
-    await wait(time)
-    setisRecording(false)
-    const answer = userAnswer.current
-    userAnswer.current = ''
-    console.log(answer)
-    return answer
-  }
-
-  const {
-    setisRecording
-  } = useSpeechRecognition({
-    onResult: handleGotAnswer,
-    options: {
-      continuous: false,
-      interimResults: false,
-    }
-  })
 
   const [isCalling, setIsCalling] = useState(false)
+  const [userAnswer, setUserAsnwer] = useState(null)
+  const [offeredSlotIndex, setOfferedSlotIndex] = useState(null)
   const [selectedSlot, setselectedSlot] = useState(null)
   const [confirmed, setConfirmed] = useState(false)
 
+  const {
+    setisRecording,
+    isRecording
+  } = useSpeechRecognition({
+    onResult: setUserAsnwer,
+    options: {
+      continuous: true,
+      interimResults: true,
+    }
+  })
+
+  const startListening = () => {
+    setUserAsnwer(null)
+    setisRecording(true)
+  }
+
+  const stopListening = () => {
+    setisRecording(false)
+  }
+
+  useEffect(() => {
+    if (offeredSlotIndex !== null && !selectedSlot) {
+      if (!slots[offeredSlotIndex]) {
+        say('You have not choosen any slot. Good bye.').then(() => {
+          stopListening()
+          setIsCalling(false)
+        })
+        return
+      }
+
+      say(getReadableDateTime(slots[offeredSlotIndex].start))
+      .then(() => {
+        startListening()
+        return wait(3)
+      })
+      .then(() => {
+        stopListening()
+        // TODO: it steps one loop cycle forward unnecessarily
+        setOfferedSlotIndex(prevIndex => prevIndex + 1)
+      })
+    }
+  }, [offeredSlotIndex])
+
+
+
+  useEffect(() => {
+    if (userAnswer === 'yes'){
+      stopListening()
+      if (selectedSlot) {
+        setConfirmed(true)
+        say(`Your appointment has been confirmed. See you on ${getReadableDateTime(selectedSlot?.start)}. Good bye.`).then(stopListening)
+      } else {
+        setselectedSlot(slots[offeredSlotIndex])
+      }
+    }
+  }, [userAnswer])
+
+  const confirmSelectedSlot = async () => {
+    await say(`Thank you. You have choosen the: ${getReadableDateTime(selectedSlot?.start)}`)
+    await say('To confirm, please, say yes')
+    startListening()
+    wait(8).then(() => {
+      stopListening()
+      return say('You have not confirmed your appointment. The booking has been failed. Good bye.')
+    }).then(() => {
+      setIsCalling(false)
+    })
+  }
 
   useEffect(() => {
     if (selectedSlot){
@@ -51,71 +103,40 @@ const Schedule = () => {
   }, [selectedSlot])
 
 
-  const sayOffers = async () => {
-    let offerAccepted
-    for (const slot of slots) {
-      await say(slot.title)
-      if ((await waitForAnswer()).toLowerCase() === 'igen') {
-        offerAccepted = true
-        setselectedSlot(slot)
-        break
-      }
-
-    }
-   if (!offerAccepted) {
-    await say('Ön nem választott időpontot. Viszontlátásra.')
-    setIsCalling(false)
-   }
-  }
-
-  const confirmSelectedSlot = async () => {
-    await say(`Köszönöm. Ön a következő időpontot választotta: ${selectedSlot?.title}`)
-    await say('A megerősítéshez mondjon igent')
-    if ((await waitForAnswer()).toLowerCase() === 'igen') {
-      setConfirmed(true)
-      await say(`
-        Köszönöm.
-        A foglalás megerősítve.
-        Várjuk Önt a következő időpontban: ${selectedSlot?.title}.
-        A viszontlátásra.
-      `)
-      setIsCalling(false)
-    } else {
-      await say('Ön nem erősítette meg a foglalást. A foglalás sikertelen. Viszontlátásra.')
-      setIsCalling(false)
-    }
-  }
-
 
   const hancdleStartClick = async () => {
     setIsCalling(true)
     await say(`
-      Üdvözlöm, Gedeon bácsi fodrászüzletét hívta.
-      Én egy virtuális asszisztens vagyok, nálam tud időpontot foglalni, hogy ne zavarjuk a mestert munka közben.
-      Felsorolom önnek a szabad időpontokat, amelyekből választhat.
-      Amennyiben megfelel az időpont, mondja azt, hogy igen.
+      Hello. You are calling the hair dresser shop of Gideon.
+      I am a virtual assistant and I will help you to book a slot for you.
+      I will offer you the available slots.
+      To choose one, please, say yes.
     `)
-    await sayOffers()
+    setOfferedSlotIndex(0)
   }
 
   return (
     <section>
-      <p>Foglaljon időpontot virtuális asszisztensünknél</p>
+      <p>Book a slot with the help of our virtual assistant</p>
       <button
         onClick={hancdleStartClick}
         disabled={isCalling}
         >
-        Mehet
+        Let's get started
       </button>
+      {offeredSlotIndex !== null && <p>Offering: {getReadableDateTime(slots[offeredSlotIndex]?.start)}</p>}
+      {isRecording && <p>Listening...</p>}
+      <p>{userAnswer}</p>
+      {selectedSlot && <p>Selected: {selectedSlot?.start}</p>}
       <br /><br />
       {confirmed && (
         <ICalendarLink event={{
-          title: "Fodrász",
-          startTime: selectedSlot.timeString,
-          location: "Lövőház utca 2-6, Budapest",
+          title: "Hair dresser",
+          startTime: selectedSlot.start,
+          location: "Budapest, Kis Rókus u. 16-20, 1024",
         }}>
           <button>
-            Hozzáadás a naptáramhoz
+            Add to my calendar
           </button>
         </ICalendarLink>
       )}

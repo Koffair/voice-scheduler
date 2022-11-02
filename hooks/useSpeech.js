@@ -11,6 +11,7 @@ const useSpeech = () => {
     const speak = new SpeechSynthesisUtterance(text)
     // speak.voice = synth.current.getVoices().find(({name}) => name === 'Mariska')
     speak.lang = 'en-US'
+    speak.voice = speechSynthesis.getVoices().find((voice) => voice.lang === 'en-US')
     speak.onend = () => onEnd(speak.text)
     synth.current.speak(speak)
   }

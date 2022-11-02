@@ -157,6 +157,7 @@ const Schedule = () => {
           </button>
         </ICalendarLink>
       )}
+      <p style={{ color: 'gray', fontSize: 12 }}>This app is under development. For the best performance, please, use Google Chrome on Desktop.</p>
     </section>
   )
 }

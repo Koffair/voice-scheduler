@@ -6,12 +6,20 @@ const defaultOptions = {
   lang: "en-US"
 }
 
+function intersect(a, b) {
+  var setA = new Set(a)
+  var setB = new Set(b)
+  var intersection = new Set([...setA].filter(x => setB.has(x)))
+  return Array.from(intersection)
+}
+
 const useSpeechRecognition = ({
   onStopped = () => {},
   onStarted = () => {},
   onResult = () => {},
   onError = (errorEvent) => {},
-  options = {}
+  options = {},
+  expected = []
 }) => {
   const recognition = useRef(null)
 
@@ -57,9 +65,19 @@ const useSpeechRecognition = ({
     recognition.current.onresult = (event) => {
       const recordingResult = Array.from(event.results)
         .map((result) => result[0])
-        .map((result) => result.transcript)
-        .join("")
-        onResult(recordingResult)
+        .map((result) => result.transcript.toLowerCase().trim())
+
+        if (expected?.length) {
+          const expectedResultIntersection = intersect(expected, recordingResult)
+
+          if (expectedResultIntersection.length > 0) {
+            recognition.current.stop()
+            stopRecording()
+          }
+          onResult(expectedResultIntersection)
+        } else {
+          onResult(recordingResult.join(""))
+        }
 
       recognition.current.onerror = (event) => {
         onError(event.error)

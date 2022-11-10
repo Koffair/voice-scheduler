@@ -23,6 +23,7 @@ const Examples = () => {
         <AppFrame>
           <Schedule />
         </AppFrame>
+        <a href="https://www.vecteezy.com/free-vector/virtual-assistant">Virtual Assistant Vectors by Vecteezy</a>
       </div>
     </div>
   );

@@ -29,6 +29,10 @@ const useSpeechRecognition = ({
     setisRecording((prevState) => !prevState)
   }
 
+  const stopRecording = () => {
+    setisRecording(false)
+  }
+
   useEffect(() => {
     startRecordController()
   }, [isRecording])
@@ -66,7 +70,8 @@ const useSpeechRecognition = ({
   return {
     isRecording,
     toggleRecording,
-    setisRecording
+    setisRecording,
+    stopRecording,
   }
 }
 

@@ -1,12 +1,16 @@
-import Dictaphone from "../components/Dictaphone";
 import AppLayout from "../components/AppLayout";
 import SubPageLayout from "../components/SubPageLayout";
+import dynamic from 'next/dynamic'
+
+const DictaphoneNoSSR = dynamic(() => import('../components/Dictaphone'), {
+  ssr: false
+})
 
 const App = () => {
   return (
     <AppLayout>
       <SubPageLayout>
-        <Dictaphone />
+        <DictaphoneNoSSR />
       </SubPageLayout>
     </AppLayout>
   )

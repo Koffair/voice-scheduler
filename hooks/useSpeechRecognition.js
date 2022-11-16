@@ -14,19 +14,14 @@ function intersect(a, b) {
 }
 
 const useSpeechRecognition = ({
-  // onStopped = () => {},
-  onStarted = () => {},
+  onToggleRecording = (isRecording) => {},
   onResult = () => {},
   onError = (errorEvent) => {},
   options = {},
   expected = [],
-  autoStart = false,
 }) => {
   const recognition = useRef(null)
-  const recognitionStatus = useRef({ isRecording: false })
-  // const [isRecording, setisRecording] = useState(autoStart)
 
-  // useEffect(() => {
   if (!recognition.current){
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     recognition.current = new SpeechRecognition()
@@ -52,49 +47,20 @@ const useSpeechRecognition = ({
       } else {
         onResult(recordingResult.join(""))
       }
-    }    
+    }
+    
+    recognition.current.onstart = () => {
+      onToggleRecording(true)
+    }
+
+    recognition.current.onend = () => {
+      onToggleRecording(false)
+    }  
+
   }
 
-    // recognition.current.onstart = () => {
-    //   recognitionStatus.current.isRecording = true
-    //   onStarted()
-    //   setisRecording(true)
-    // }
-
-    // recognition.current.onend = () => {
-    //   recognitionStatus.current.isRecording = false
-    //   setisRecording(false)
-    // }    
-  // }, [])
-
-
-  // const startRecordController = () => {
-  //   console.log(recognition.current)
-  //   if (isRecording) {
-  //     recognition.current.start()
-  //     // recognition.current.onend = () => {
-  //     //   console.log('talk ended by silence')
-  //     //   recognition.current.start()
-  //     // }
-  //   // } else {
-  //     recognition.current.stop()
-  //     recognition.current.onend = () => {
-  //       onStopped()
-  //     }
-  //   // }
-
-
-  
-
-  // }  
-
   return {
-    // isRecording,
     recognition,
-    recognitionStatus,
-    // toggleRecording,
-    // setisRecording,
-    // stopRecording,
   }
 }
 

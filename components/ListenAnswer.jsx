@@ -8,7 +8,7 @@ const ListenAnswer = ({
   autoStart = false,
   trigger = ({ isRecording, recognition }) => (
     <>
-      <button onClick={() => recognition.current?.start()}>
+      <button onClick={() => isRecording ? recognition.current?.stop() : recognition.current?.start()}>
         {isRecording ? "Állj" : "Rögzítés"}
       </button>    
       {" "}
@@ -17,13 +17,13 @@ const ListenAnswer = ({
   )
 }) => {
   const [textArray, setTextArray] = useState([])
+  const [isRecording, setIsRecording] = useState(false)
   const started = useRef(false)
 
   const {
     recognition,
-    // isRecording,
-    recognitionStatus,
   } = useSpeechRecognition({
+    onToggleRecording: setIsRecording,
     onResult: setTextArray,
     expected: Array.isArray(expected) ? expected : [expected],
   })
@@ -43,7 +43,7 @@ const ListenAnswer = ({
       <div>
         <div className={styles.noteContainer}>
           <h2>Hangjegyzet</h2>
-          {/* {trigger({ isRecording, recognition })} */}
+          {trigger({ isRecording, recognition })}
           {(textArray.includes(expected) || textArray.includes(expected[0])) && (
             <>
               {children[0]}

@@ -26,8 +26,12 @@ const App = () => {
           <ListenAnswer
             useText={useText}
             setText={setText}
-            expected="blue"
-          />
+            expected={["blue", "red"]}
+            autoStart
+          >
+            <div>blue</div>
+            <div>red</div>
+          </ListenAnswer>
           <Color useText={useText} />
         </Subscribe>
       </SubPageLayout>

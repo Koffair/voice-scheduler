@@ -5,7 +5,7 @@ import { Subscribe } from "@react-rxjs/core";
 // const ListenAnswerNoSSR = dynamic(() => import('../components/ListenAnswer'), {
 //   ssr: false
 // })
-import ListenAnswer from "../components/ListenAnswer";
+import ListenAnswer, { defaultTrigger } from "../components/ListenAnswer";
 
 import { bind } from "@react-rxjs/core";
 import { createSignal } from "@react-rxjs/utils";
@@ -27,9 +27,20 @@ const App = () => {
             useText={useText}
             setText={setText}
             expected={["blue", "red"]}
-            autoStart
+            trigger={defaultTrigger}
           >
-            <div>blue</div>
+            <>
+              <div>blue</div>
+              <ListenAnswer
+                useText={useText}
+                setText={setText}
+                expected={["dark blue", "azure"]}
+                autoStart
+              >
+                <div>dark blue</div>
+                <div>azure</div>
+              </ListenAnswer>
+            </>
             <div>red</div>
           </ListenAnswer>
           <Color useText={useText} />

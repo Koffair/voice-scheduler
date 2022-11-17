@@ -1,16 +1,10 @@
-import { useState, useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
+import { intersect } from "../functions"
 
 const defaultOptions = {
   continuous: true,
   interimResults: true,
   lang: "en-US"
-}
-
-function intersect(a, b) {
-  var setA = new Set(a)
-  var setB = new Set(b)
-  var intersection = new Set([...setA].filter(x => setB.has(x)))
-  return Array.from(intersection)
 }
 
 const useSpeechRecognition = ({
@@ -22,42 +16,44 @@ const useSpeechRecognition = ({
 }) => {
   const recognition = useRef(null)
 
-  if (!recognition.current){
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    recognition.current = new SpeechRecognition()
-    Object.entries({ ...defaultOptions, ...options }).forEach(([key, value]) => {
-      recognition.current[key] = value
-    })
+  useEffect(() => {
+    if (!recognition.current){
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+      recognition.current = new SpeechRecognition()
+      Object.entries({ ...defaultOptions, ...options }).forEach(([key, value]) => {
+        recognition.current[key] = value
+      })
 
-    recognition.current.onresult = (event) => {
-      const recordingResult = Array.from(event.results)
-      .map((result) => result[0])
-      .map((result) => result.transcript.toLowerCase().trim())
+      recognition.current.onresult = (event) => {
+        const recordingResult = Array.from(event.results)
+        .map((result) => result[0])
+        .map((result) => result.transcript.toLowerCase().trim())
 
-      console.log(recordingResult)
+        console.log(recordingResult)
 
-      if (expected?.length) {
-        const expectedResultIntersection = intersect(expected, recordingResult)
+        if (expected?.length) {
+          const expectedResultIntersection = intersect(expected, recordingResult)
 
-        if (expectedResultIntersection.length > 0) {
-          console.log('stop')
-          recognition.current.stop()
+          if (expectedResultIntersection.length > 0) {
+            console.log('stop')
+            recognition.current.stop()
+          }
+          onResult(expectedResultIntersection)
+        } else {
+          onResult(recordingResult.join(""))
         }
-        onResult(expectedResultIntersection)
-      } else {
-        onResult(recordingResult.join(""))
       }
-    }
-    
-    recognition.current.onstart = () => {
-      onToggleRecording(true)
-    }
+      
+      recognition.current.onstart = () => {
+        onToggleRecording(true)
+      }
 
-    recognition.current.onend = () => {
-      onToggleRecording(false)
-    }  
+      recognition.current.onend = () => {
+        onToggleRecording(false)
+      }  
 
-  }
+    }
+  }, [])
 
   return {
     recognition,

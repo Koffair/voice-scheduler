@@ -18,7 +18,7 @@ const ListenAnswer = ({
   autoStart = false,
   trigger = () => null
 }) => {
-  const [textArray, setTextArray] = useState([])
+  const [responses, setResponses] = useState([])
   const [isRecording, setIsRecording] = useState(false)
   const started = useRef(false)
 
@@ -26,33 +26,23 @@ const ListenAnswer = ({
     recognition,
   } = useSpeechRecognition({
     onToggleRecording: setIsRecording,
-    onResult: setTextArray,
+    onResult: setResponses,
     expected: Array.isArray(expected) ? expected : [expected],
   })
 
   useEffect(() => {
-    if (autoStart && recognition.current?.start && !started.current && !textArray.length) {
+    if (autoStart && recognition.current?.start && !started.current && !responses.length) {
       started.current = true
-      console.log('start')
       recognition.current?.start()
     }
   }, [autoStart, recognition])
 
   return (
     <>
-      {console.log('render')}
+      {isRecording && <div>Listening...</div>}
       <div>
         {trigger({ isRecording, recognition })}
-        {(textArray.includes(expected) || textArray.includes(expected[0])) && (
-          <>
-            {children[0]}
-          </>
-        )}
-        {textArray.includes(expected[1]) && (
-          <>
-            {children[1]}
-          </>
-        )}
+        {children({ responses })}
       </div>
     </>
   )
